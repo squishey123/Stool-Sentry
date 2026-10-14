@@ -1,0 +1,12 @@
+# Stool Sentry
+
+## Commit & Push
+
+When the user says "Commit & Push", run the publish flow. Do not run it for any other commit. The Phase 1 handoff commit is an ordinary commit and must not follow this flow.
+
+1. Do not change git config. If this machine has no commit identity, stop and ask.
+2. Read version.properties. If origin already has the tag v{VERSION_NAME}, add 1 to the patch number and add 1 to VERSION_CODE. If that tag does not exist, publish the current version as-is. A hand-edited version such as 1.1.0 is kept when its tag is new. The first publish stays 1.0.0.
+3. Commit the project. Do not commit Mailbox/, the keystore, keystore.properties, local.properties, or signing secrets.
+4. Tag v{VERSION_NAME} and push the branch and the tag.
+5. Wait until the Release GitHub Actions workflow for that tag succeeds. If it fails, do not bump again. Fix the build and re-run that same tag.
+6. Write user-facing release notes with `gh release edit`. For v1.0.0, describe the first release. After that, describe the changes since the previous tag. Do not make another commit for the notes.

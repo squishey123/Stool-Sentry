@@ -1,0 +1,30 @@
+name: Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: platforms;android-37.2 build-tools;36.0.0 platform-tools
+
+      - name: Use the runner JDK
+        run: sed -i '/^org.gradle.java.home=/d' gradle.properties
+
+      - name: Test and assemble debug
+        run: chmod +x gradlew && ./gradlew test assembleDebug --stacktrace
