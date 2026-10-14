@@ -11,6 +11,7 @@ import com.squishey.stoolsentry.data.SettingsStore
 import com.squishey.stoolsentry.domain.SystemAppClock
 import com.squishey.stoolsentry.ui.calendar.CalendarViewModel
 import com.squishey.stoolsentry.ui.day.DayViewModel
+import com.squishey.stoolsentry.ui.lock.AppLock
 import com.squishey.stoolsentry.ui.log.LogWizardViewModel
 import com.squishey.stoolsentry.ui.settings.SettingsViewModel
 import com.squishey.stoolsentry.ui.summary.SummaryViewModel
@@ -20,6 +21,7 @@ class AppContainer(context: Context) {
     private val database = AppDatabase.create(context)
     val repository = LogRepository(database.bowelLogDao(), clock)
     val settings = SettingsStore(context)
+    val appLock = AppLock()
     val viewModelFactory = AppViewModelFactory(this)
 }
 

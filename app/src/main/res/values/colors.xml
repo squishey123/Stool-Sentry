@@ -2,4 +2,5 @@
 <resources>
     <color name="window_background">#12100E</color>
     <color name="ic_launcher_background">#1C1410</color>
+    <color name="gold">#E0A45A</color>
 </resources>

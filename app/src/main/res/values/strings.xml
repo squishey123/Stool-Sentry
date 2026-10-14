@@ -1,4 +1,194 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Stool Sentry</string>
+
+    <!-- Shared -->
+    <string name="version_label">v%1$s</string>
+    <string name="action_back">Back</string>
+    <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_done">Done</string>
+    <string name="action_next">Next</string>
+    <string name="action_delete">Delete</string>
+    <string name="no_value">—</string>
+    <string name="answer_yes">Yes</string>
+    <string name="answer_no">No</string>
+
+    <!-- Calendar -->
+    <string name="calendar_summary">Summary</string>
+    <string name="calendar_settings">Settings</string>
+    <string name="greeting_morning">Good morning, Your Majesty</string>
+    <string name="greeting_afternoon">Good afternoon, Your Majesty</string>
+    <string name="greeting_evening">Good evening, Your Majesty</string>
+    <string name="greeting_night">Burning the midnight oil, Your Majesty</string>
+    <string name="last_visit_none">No visits logged yet</string>
+    <string name="last_visit_today">Last visit today at %1$s</string>
+    <string name="last_visit_yesterday">Last visit yesterday at %1$s</string>
+    <plurals name="last_visit_days_ago">
+        <item quantity="one">Last visit %d day ago</item>
+        <item quantity="other">Last visit %d days ago</item>
+    </plurals>
+    <string name="calendar_previous_month">Previous month</string>
+    <string name="calendar_next_month">Next month</string>
+    <string name="calendar_today">Today</string>
+    <string name="calendar_log">Log</string>
+    <string name="calendar_log_for">Log for %1$s</string>
+    <string name="calendar_month_logs">Logs in %1$s</string>
+    <string name="calendar_month_days">Days logged in %1$s</string>
+    <string name="calendar_hint">Tap any day to see or edit its logs</string>
+    <string name="calendar_empty_title">Your reign begins with a single log</string>
+    <string name="calendar_empty_body">After your next visit to the throne, tap Log to record it. Tap any day to see what you logged.</string>
+    <plurals name="calendar_day_logs">
+        <item quantity="one">%1$s, %2$d log</item>
+        <item quantity="other">%1$s, %2$d logs</item>
+    </plurals>
+    <string name="calendar_day_today">%1$s, today</string>
+
+    <!-- Snackbars -->
+    <string name="snack_logged">Logged. The throne thanks you.</string>
+    <string name="snack_updated">Updated</string>
+    <string name="snack_deleted">Log deleted</string>
+    <string name="snack_export_done">Export saved</string>
+    <string name="snack_export_failed">Couldn\'t save the export</string>
+    <string name="snack_import_failed">Couldn\'t read that file</string>
+    <string name="snack_import_nothing">Nothing imported. That file isn\'t a Stool Sentry CSV, or every row was invalid.</string>
+    <plurals name="snack_imported">
+        <item quantity="one">Imported %d log</item>
+        <item quantity="other">Imported %d logs</item>
+    </plurals>
+    <plurals name="snack_imported_skipped">
+        <item quantity="one">Imported %1$d, skipped %2$d invalid row</item>
+        <item quantity="other">Imported %1$d, skipped %2$d invalid rows</item>
+    </plurals>
+
+    <!-- Wizard -->
+    <string name="wizard_step">Step %1$d of %2$d</string>
+    <string name="wizard_step_editing">Editing · Step %1$d of %2$d</string>
+    <string name="wizard_type_title">Which type was it?</string>
+    <string name="wizard_type_subtitle">Pick the closest match on the Bristol Stool Scale.</string>
+    <string name="wizard_size_title">How big was it?</string>
+    <string name="wizard_size_subtitle">A rough guess is fine.</string>
+    <string name="wizard_color_title">What color was it?</string>
+    <string name="wizard_color_subtitle">Choose the nearest shade.</string>
+    <string name="wizard_details_title">Final details</string>
+    <string name="wizard_details_subtitle">Check the time, then add anything worth noting.</string>
+    <string name="wizard_bristol_info">About the Bristol scale</string>
+    <string name="wizard_bristol_info_title">Bristol Stool Scale</string>
+    <string name="wizard_bristol_info_body">A standard seven-type scale used by clinicians. Types 3 and 4 are generally considered typical. If one visit has mixed forms, log the closest type, or add a second log.</string>
+    <string name="wizard_when">When</string>
+    <string name="wizard_symptoms">Symptoms</string>
+    <string name="wizard_notes">Notes</string>
+    <string name="wizard_notes_placeholder">Anything worth remembering? Food, mood, medication…</string>
+    <string name="wizard_notes_counter">%1$d / %2$d</string>
+    <string name="wizard_future_error">That time hasn\'t happened yet. Pick a time up to now.</string>
+    <string name="wizard_pick_date">Change date</string>
+    <string name="wizard_pick_time">Change time</string>
+    <string name="wizard_progress">Step %1$d of %2$d</string>
+    <string name="symptom_urgent">Urgent</string>
+    <string name="symptom_blood">Blood</string>
+    <string name="symptom_painful">Painful</string>
+    <string name="symptom_straining">Straining</string>
+    <string name="symptom_incomplete">Incomplete emptying</string>
+    <string name="symptom_mucus">Mucus</string>
+
+    <!-- Day -->
+    <plurals name="day_log_count">
+        <item quantity="one">%d log</item>
+        <item quantity="other">%d logs</item>
+    </plurals>
+    <string name="day_no_logs">No logs</string>
+    <string name="day_empty_title">A quiet day on the throne</string>
+    <string name="day_empty_body">Nothing was logged for this day.</string>
+    <string name="day_empty_future">This day hasn\'t happened yet.</string>
+    <string name="day_add">Add log</string>
+    <string name="day_delete_title">Delete this log?</string>
+    <string name="day_delete_body">This removes the %1$s log from this phone. It can\'t be undone.</string>
+    <string name="day_type_size">%1$s · %2$s</string>
+    <string name="day_edit_log">Edit the %1$s log</string>
+    <string name="day_delete_log">Delete the %1$s log</string>
+
+    <!-- Summary -->
+    <string name="summary_title">Summary</string>
+    <string name="summary_eyebrow">The royal report</string>
+    <string name="period_7">7 days</string>
+    <string name="period_30">30 days</string>
+    <string name="period_90">90 days</string>
+    <string name="period_all">All time</string>
+    <string name="summary_range">%1$s – %2$s</string>
+    <string name="summary_logs">Logs</string>
+    <string name="summary_per_day">Per day</string>
+    <string name="summary_since_last">Days since last</string>
+    <string name="summary_longest_gap">Longest gap</string>
+    <plurals name="summary_days_unit">
+        <item quantity="one">day</item>
+        <item quantity="other">days</item>
+    </plurals>
+    <string name="summary_bristol">Bristol type</string>
+    <string name="summary_size">Size</string>
+    <string name="summary_color">Color</string>
+    <string name="summary_time_of_day">Time of day</string>
+    <string name="summary_symptoms">Symptoms</string>
+    <string name="summary_symptoms_hint">Share of logs with each symptom</string>
+    <string name="summary_share">%1$d · %2$d%%</string>
+    <string name="summary_percent">%1$d%%</string>
+    <string name="summary_period_empty">No logs in this period. Try a longer range.</string>
+    <string name="summary_empty_title">Your report awaits</string>
+    <string name="summary_empty_body">No logs yet. Trends appear here once you\'ve logged a few visits.</string>
+    <string name="summary_clinician_title">A gentle note</string>
+    <string name="summary_clinician_body">Some logs in this period include red, maroon, or black stool, or blood. Foods and supplements such as beets or iron can cause this, but if it keeps happening or you feel unwell, consider talking to a clinician.</string>
+    <string name="summary_footer">Stool Sentry is a log, not a medical device.</string>
+    <string name="time_morning_range">5:00–10:59</string>
+    <string name="time_afternoon_range">11:00–16:59</string>
+    <string name="time_evening_range">17:00–22:59</string>
+    <string name="time_night_range">23:00–4:59</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+    <string name="settings_section_data">Your data</string>
+    <string name="settings_export">Export logs</string>
+    <string name="settings_export_body">Save every log as a CSV file</string>
+    <string name="settings_import">Import logs</string>
+    <string name="settings_import_body">Add logs from a Stool Sentry CSV file</string>
+    <string name="settings_export_dialog_title">Export your logs?</string>
+    <string name="settings_export_dialog_body">The CSV file isn\'t encrypted. Anyone who has the file can read your logs, so keep it somewhere private.</string>
+    <string name="settings_export_confirm">Export</string>
+    <string name="settings_section_privacy">Privacy</string>
+    <string name="settings_lock">App lock</string>
+    <string name="settings_lock_body">Ask for your fingerprint, face, or screen lock when you open the app</string>
+    <string name="settings_lock_unavailable">Set up a screen lock or biometric in Android settings to use app lock</string>
+    <string name="settings_lock_note">App lock hides the app behind your screen lock. The logs on this phone are not encrypted.</string>
+    <string name="settings_section_calendar">Calendar</string>
+    <string name="settings_week_start">Week starts on</string>
+    <string name="settings_section_about">About</string>
+    <string name="settings_disclaimer">Medical disclaimer</string>
+    <string name="settings_disclaimer_body">A log, not a doctor</string>
+    <string name="settings_version">Version</string>
+    <string name="settings_free">Free and ad-free, forever</string>
+    <string name="settings_free_body">No account, no ads, no analytics, no internet access</string>
+    <string name="settings_license">License</string>
+    <string name="settings_license_value">GPL-3.0</string>
+    <string name="settings_backup_note">Android backup skips your logs. Export a CSV to keep a copy. Uninstalling the app deletes every log on this phone.</string>
+    <string name="export_file_name">stool-sentry-%1$s.csv</string>
+
+    <!-- Welcome and disclaimer -->
+    <string name="welcome_eyebrow">Stool Sentry</string>
+    <string name="welcome_title">Welcome to the throne room</string>
+    <string name="welcome_subtitle">A private, elegant log of every royal visit.</string>
+    <string name="welcome_private_title">Private by design</string>
+    <string name="welcome_private_body">Your logs stay on this phone. No account, no ads, and no internet access.</string>
+    <string name="welcome_doctor_title">A log, not a doctor</string>
+    <string name="welcome_doctor_body">Stool Sentry records patterns. It doesn\'t diagnose anything. Talk to a clinician about anything that worries you.</string>
+    <string name="welcome_backup_title">Back up with CSV</string>
+    <string name="welcome_backup_body">Export your logs from Settings. Uninstalling the app deletes them.</string>
+    <string name="welcome_accept">I understand</string>
+    <string name="disclaimer_title">A log, not a doctor</string>
+    <string name="disclaimer_body">Stool Sentry is a personal record. It is not a medical device and does not diagnose, treat, or prevent any condition. The summary\'s notes are general information only. If you notice blood, black or maroon stool, ongoing changes, or pain, talk to a qualified clinician. In an emergency, contact local emergency services.</string>
+
+    <!-- App lock -->
+    <string name="lock_title">The throne room is locked</string>
+    <string name="lock_body">Unlock to see your logs.</string>
+    <string name="lock_unlock">Unlock</string>
+    <string name="lock_prompt_title">Unlock Stool Sentry</string>
+    <string name="lock_prompt_subtitle">Confirm it\'s you</string>
+    <string name="lock_enable_prompt_title">Turn on app lock</string>
 </resources>

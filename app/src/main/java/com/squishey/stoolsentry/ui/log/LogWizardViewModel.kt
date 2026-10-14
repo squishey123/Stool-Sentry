@@ -7,6 +7,7 @@ import com.squishey.stoolsentry.data.LogRepository
 import com.squishey.stoolsentry.domain.AppClock
 import com.squishey.stoolsentry.domain.BowelLog
 import com.squishey.stoolsentry.domain.BristolType
+import com.squishey.stoolsentry.domain.LogValidator
 import com.squishey.stoolsentry.domain.StoolColor
 import com.squishey.stoolsentry.domain.StoolSize
 import com.squishey.stoolsentry.domain.Symptoms
@@ -75,6 +76,14 @@ class LogWizardViewModel(
     fun setDateTime(date: LocalDate, time: LocalTime) = update { it.withDateTime(date, time) }
 
     fun next() = update { it.next() }
+
+    /** True when the draft's date and time are later than now. */
+    fun isInFuture(draft: WizardState): Boolean =
+        LogValidator.isFuture(draft.occurredAtMillis, clock.instant().toEpochMilli())
+
+    fun canSave(draft: WizardState): Boolean = draft.canSave(clock.instant().toEpochMilli())
+
+    fun today(): LocalDate = clock.today()
 
     /** Returns true when the screen should close without saving. */
     fun back(): Boolean {

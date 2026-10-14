@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.squishey.stoolsentry.data.LogRepository
 import com.squishey.stoolsentry.data.SettingsStore
 import com.squishey.stoolsentry.domain.AppClock
+import com.squishey.stoolsentry.domain.BowelLog
 import com.squishey.stoolsentry.domain.CalendarIndex
+import com.squishey.stoolsentry.domain.MonthTally
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -23,6 +25,9 @@ data class CalendarUiState(
     val selectedDate: LocalDate,
     val countsByDate: Map<LocalDate, Int>,
     val weekStart: DayOfWeek,
+    val latestLog: BowelLog? = null,
+    val monthTally: MonthTally = MonthTally(logCount = 0, loggedDays = 0),
+    val loaded: Boolean = false,
 )
 
 class CalendarViewModel(
@@ -41,12 +46,16 @@ class CalendarViewModel(
         selectedDate,
         settingsStore.settings,
     ) { logs, currentToday, month, selected, settings ->
+        val counts = CalendarIndex.countsByDate(logs)
         CalendarUiState(
             today = currentToday,
             visibleMonth = month,
             selectedDate = selected,
-            countsByDate = CalendarIndex.countsByDate(logs),
+            countsByDate = counts,
             weekStart = settings.weekStart,
+            latestLog = CalendarIndex.latest(logs),
+            monthTally = CalendarIndex.monthTally(counts, month),
+            loaded = true,
         )
     }.stateIn(
         viewModelScope,
@@ -62,6 +71,13 @@ class CalendarViewModel(
 
     fun select(date: LocalDate) {
         selectedDate.value = date
+    }
+
+    /** Selects [date] and shows its month, e.g. after a log is saved. */
+    fun focus(date: LocalDate) {
+        refreshToday()
+        selectedDate.value = date
+        visibleMonth.value = YearMonth.from(date)
     }
 
     fun showPreviousMonth() {
