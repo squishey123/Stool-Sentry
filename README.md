@@ -15,13 +15,9 @@ Copyright (C) 2026 squishey123. Licensed under [GPL-3.0](LICENSE).
 - Export and import a CSV file from Settings. That file is the backup.
 - An optional app lock asks for the device screen lock or biometrics when the app opens.
 
-There is no "no bowel movement" choice. Leaving a day empty already means nothing happened.
-
 ## Install
 
 Download `stool-sentry-1.0.0.apk` from the [GitHub Release](https://github.com/squishey123/Stool-Sentry/releases) and install it. Android will ask you to allow installs from your browser or file manager. The release APK is signed. A debug build uses a different key, so it will not update an installed release.
-
-This repository is private. You need access to the repo to download the APK.
 
 ## Build
 
@@ -56,12 +52,6 @@ The database file is not encrypted. App lock only hides the screens behind the d
 ## Medical disclaimer
 
 Stool Sentry is a personal log. It is not a medical device and does not diagnose, treat, or prevent any condition. The summary note about red, maroon, or black stool, or blood, is general information only. Talk to a qualified clinician about symptoms that worry you.
-
-## Future features
-
-Photo attachments are planned and are not in this version. Also left for later: user-defined symptoms, a home-screen widget, cloud sync, accounts, database encryption, a PDF clinic report, a daily reminder, search, medication, food, hydration, a light theme, and more languages.
-
-Urine tracking and any paid tier are not part of this app.
 
 ## Fonts
 
