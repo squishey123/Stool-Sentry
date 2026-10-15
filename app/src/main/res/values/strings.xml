@@ -212,8 +212,8 @@
     <string name="encrypt_offer_enable">Create a passphrase</string>
     <string name="encrypt_offer_skip">Not now</string>
     <string name="encrypt_create_title">Encrypt your logs</string>
-    <string name="encrypt_create_body">This passphrase encrypts the logs on this phone and the backup file. It is what opens a backup on a new phone. Changing this phone\'s screen lock does not change it.</string>
-    <string name="encrypt_suggestion">A sentence of at least 12 characters, with letters, numbers, and symbols, is harder to guess. Any passphrase is allowed.</string>
+    <string name="encrypt_create_body">This passphrase encrypts the logs on your phone and in backup files. You will need it to restore your data if you reinstall the app or switch to a new device.</string>
+    <string name="encrypt_suggestion">A passphrase of at least 12 characters, with letters, numbers, and symbols, is harder to guess. Any passphrase is allowed.</string>
     <string name="encrypt_forgotten">If you forget this passphrase, the encrypted logs and backups cannot be opened. Stool Sentry cannot reset it.</string>
     <string name="encrypt_cloud_history">Older copies of stool-sentry.csv may still be saved in your storage app\'s version history. Delete those if you don\'t want a readable copy.</string>
     <string name="encrypt_passphrase">Passphrase</string>
