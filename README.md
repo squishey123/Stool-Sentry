@@ -17,41 +17,9 @@ Copyright (C) 2026 squishey123. Licensed under [GPL-3.0](LICENSE).
 
 There is no "no bowel movement" choice. Leaving a day empty already means nothing happened.
 
-## Install and updates
-
-Download `stool-sentry-1.0.0.apk` from the [GitHub Release](https://github.com/squishey123/Stool-Sentry/releases) and install it. Android will ask you to allow installs from your browser or file manager. The release APK is signed. A debug build uses a different key, so it will not update an installed release.
-
-F-Droid is the intended place for later updates. The listing is published after the next release. Until then, install from the GitHub Release above. That later F-Droid build uses this same release key, so it can replace the GitHub install without an uninstall.
-
-Your logs stay on the phone. Uninstalling the app deletes them. Export a backup from Settings if you want a copy before you switch devices or remove the app. With encryption on, that file opens with your passphrase.
-
-## Build
-
-You need JDK 21 and the Android SDK. From this folder:
-
-```bash
-./gradlew test assembleDebug
-```
-
-On Windows, use `gradlew.bat`. If `JAVA_HOME` is older than 21, set `org.gradle.java.home` in `%USERPROFILE%\.gradle\gradle.properties`. Leave that path out of the project `gradle.properties`, because the F-Droid buildserver checks out this file.
-
-The debug APK is `app/build/outputs/apk/debug/app-debug.apk`.
-
-## Releases
-
-A tag named `v*` must match `VERSION_NAME` in `version.properties`. The release workflow builds a signed APK and attaches `stool-sentry-{version}.apk` to the GitHub Release for that tag. F-Droid rebuilds the tag and publishes the GitHub APK only when the two builds match. `v1.0.0` stays a GitHub release. The first tag for F-Droid is the next one.
-
-The signing key is not in git.
-
 ## Medical disclaimer
 
 Stool Sentry is a personal log. It is not a medical device and does not diagnose, treat, or prevent any condition. The summary note about red, maroon, or black stool, or blood, is general information only. Talk to a qualified clinician about symptoms that worry you.
-
-## Coming later
-
-Photo attachments are planned and are not in this version. Also left for later: custom symptoms, a home-screen widget, optional sync you control, a clinic-ready PDF report, reminders, search, medication and food notes, a light theme, and more languages.
-
-Urine tracking and any paid tier are not part of this app.
 
 ## Privacy
 
