@@ -18,6 +18,13 @@ Builds:
     gradle:
       - yes
     output: build/outputs/apk/release/app-release-unsigned.apk
+  - versionName: '1.0.2'
+    versionCode: 3
+    commit: v1.0.2
+    subdir: app
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-release-unsigned.apk
 
 AllowedAPKSigningKeys:
   - 824dbabf1e00ba8d3686fb3c0f92e805e83d82e5a6d8cd8f0f730b7111250e43
@@ -25,8 +32,8 @@ AllowedAPKSigningKeys:
 AutoUpdateMode: Version
 UpdateCheckMode: Tags v[0-9.]+
 UpdateCheckData: version.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.*)
-CurrentVersion: '1.0.1'
-CurrentVersionCode: 2
+CurrentVersion: '1.0.2'
+CurrentVersionCode: 3
 
 Binaries: https://github.com/squishey123/Stool-Sentry/releases/download/v%v/stool-sentry-%v.apk
 

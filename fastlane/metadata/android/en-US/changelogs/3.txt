@@ -1,0 +1,1 @@
+Clarifies the encrypt-logs screen: your passphrase protects logs on the phone and in backup files, and you need it to restore after a reinstall or when moving to a new device. Suggests a passphrase (not a sentence) of at least 12 characters.
