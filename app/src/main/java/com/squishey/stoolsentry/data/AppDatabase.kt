@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import net.zetetic.database.sqlcipher.SupportOpenHelperFactory
 
 @Database(
     entities = [BowelLogEntity::class],
@@ -14,11 +15,17 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun bowelLogDao(): BowelLogDao
 
     companion object {
-        fun create(context: Context): AppDatabase =
-            Room.databaseBuilder(
+        fun open(context: Context, name: String, passphrase: ByteArray?): AppDatabase {
+            val builder = Room.databaseBuilder(
                 context.applicationContext,
                 AppDatabase::class.java,
-                "stool_sentry.db",
-            ).build()
+                name,
+            )
+            if (passphrase != null) {
+                SqlCipher.load()
+                builder.openHelperFactory(SupportOpenHelperFactory(passphrase.copyOf(), null, true))
+            }
+            return builder.build()
+        }
     }
 }

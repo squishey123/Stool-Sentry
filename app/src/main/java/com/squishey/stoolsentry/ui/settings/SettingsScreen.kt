@@ -66,8 +66,18 @@ fun SettingsScreen(
     onImport: () -> Unit,
     onLockChange: (Boolean) -> Unit,
     onWeekStart: (DayOfWeek) -> Unit,
+    onAutoExportEnabled: (Boolean) -> Unit = {},
+    onPickAutoExportFolder: () -> Unit = {},
+    onLicense: () -> Unit = {},
+    encrypted: Boolean = false,
+    onEnableEncryption: () -> Unit = {},
+    onChangePassphrase: () -> Unit = {},
+    onDisableEncryption: () -> Unit = {},
+    onExportReadable: () -> Unit = {},
 ) {
     var confirmExport by rememberSaveable { mutableStateOf(false) }
+    var confirmReadable by rememberSaveable { mutableStateOf(false) }
+    var confirmAutoExport by rememberSaveable { mutableStateOf(false) }
     var pickWeekStart by rememberSaveable { mutableStateOf(false) }
     var showDisclaimer by rememberSaveable { mutableStateOf(false) }
     val locale = currentLocale()
@@ -88,9 +98,44 @@ fun SettingsScreen(
                     SettingsRow(
                         icon = R.drawable.ic_download,
                         title = stringResource(R.string.settings_export),
-                        body = stringResource(R.string.settings_export_body),
+                        body = stringResource(
+                            if (encrypted) R.string.settings_export_body_encrypted else R.string.settings_export_body,
+                        ),
                         onClick = { confirmExport = true },
                     )
+                    if (encrypted) {
+                        CardDivider(Modifier.padding(start = 64.dp))
+                        SettingsRow(
+                            icon = R.drawable.ic_download,
+                            title = stringResource(R.string.settings_export_readable),
+                            body = stringResource(R.string.settings_export_readable_body),
+                            onClick = { confirmReadable = true },
+                        )
+                    }
+                    CardDivider(Modifier.padding(start = 64.dp))
+                    AutoExportRow(
+                        enabled = settings.autoExportEnabled,
+                        body = stringResource(
+                            if (encrypted) {
+                                R.string.settings_auto_export_body_encrypted
+                            } else {
+                                R.string.settings_auto_export_body
+                            },
+                        ),
+                        onChange = { enable ->
+                            if (enable) confirmAutoExport = true else onAutoExportEnabled(false)
+                        },
+                    )
+                    if (settings.autoExportEnabled) {
+                        CardDivider(Modifier.padding(start = 64.dp))
+                        SettingsRow(
+                            icon = R.drawable.ic_folder,
+                            title = stringResource(R.string.settings_auto_export_folder),
+                            body = settings.autoExportFolderName
+                                ?: stringResource(R.string.settings_auto_export_choose),
+                            onClick = onPickAutoExportFolder,
+                        )
+                    }
                     CardDivider(Modifier.padding(start = 64.dp))
                     SettingsRow(
                         icon = R.drawable.ic_upload,
@@ -99,16 +144,60 @@ fun SettingsScreen(
                         onClick = onImport,
                     )
                 }
-                Note(stringResource(R.string.settings_backup_note))
+                if (settings.autoExportEnabled) {
+                    Note(
+                        stringResource(
+                            if (encrypted) R.string.settings_auto_export_note_encrypted else R.string.settings_auto_export_note,
+                        ),
+                    )
+                }
+                Note(
+                    stringResource(
+                        if (encrypted) R.string.settings_backup_note_encrypted else R.string.settings_backup_note,
+                    ),
+                )
 
                 Section(stringResource(R.string.settings_section_privacy)) {
+                    if (encrypted) {
+                        SettingsRow(
+                            icon = R.drawable.ic_shield,
+                            title = stringResource(R.string.settings_encrypt_on),
+                            body = stringResource(R.string.settings_encrypt_on_body),
+                        )
+                        CardDivider(Modifier.padding(start = 64.dp))
+                        SettingsRow(
+                            icon = R.drawable.ic_lock,
+                            title = stringResource(R.string.settings_encrypt_change),
+                            body = stringResource(R.string.settings_encrypt_change_body),
+                            onClick = onChangePassphrase,
+                        )
+                        CardDivider(Modifier.padding(start = 64.dp))
+                        SettingsRow(
+                            icon = R.drawable.ic_lock,
+                            title = stringResource(R.string.settings_encrypt_off),
+                            body = stringResource(R.string.settings_encrypt_off_body),
+                            onClick = onDisableEncryption,
+                        )
+                    } else {
+                        SettingsRow(
+                            icon = R.drawable.ic_shield,
+                            title = stringResource(R.string.settings_encrypt),
+                            body = stringResource(R.string.settings_encrypt_body),
+                            onClick = onEnableEncryption,
+                        )
+                    }
+                    CardDivider(Modifier.padding(start = 64.dp))
                     LockRow(
                         enabled = settings.appLockEnabled,
                         available = lockAvailable,
                         onChange = onLockChange,
                     )
                 }
-                Note(stringResource(R.string.settings_lock_note))
+                Note(
+                    stringResource(
+                        if (encrypted) R.string.settings_lock_note_encrypted else R.string.settings_lock_note,
+                    ),
+                )
 
                 Section(stringResource(R.string.settings_section_calendar)) {
                     SettingsRow(
@@ -137,6 +226,15 @@ fun SettingsScreen(
                         icon = R.drawable.ic_shield,
                         title = stringResource(R.string.settings_license),
                         body = stringResource(R.string.settings_license_value),
+                        onClick = onLicense,
+                        trailing = {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_chevron_right),
+                                contentDescription = null,
+                                tint = Throne.TextFaint,
+                                modifier = Modifier.size(18.dp),
+                            )
+                        },
                     )
                     CardDivider(Modifier.padding(start = 64.dp))
                     SettingsRow(
@@ -149,16 +247,53 @@ fun SettingsScreen(
         }
     }
 
+    if (confirmAutoExport) {
+        val hasFolder = !settings.autoExportTreeUri.isNullOrBlank()
+        ThroneDialog(
+            title = stringResource(R.string.settings_auto_export_dialog_title),
+            body = stringResource(
+                if (encrypted) {
+                    R.string.settings_auto_export_dialog_body_encrypted
+                } else {
+                    R.string.settings_auto_export_dialog_body
+                },
+            ),
+            confirm = stringResource(
+                if (hasFolder) R.string.settings_auto_export_confirm else R.string.settings_auto_export_choose,
+            ),
+            onConfirm = {
+                confirmAutoExport = false
+                if (hasFolder) onAutoExportEnabled(true) else onPickAutoExportFolder()
+            },
+            onDismiss = { confirmAutoExport = false },
+        )
+    }
     if (confirmExport) {
         ThroneDialog(
-            title = stringResource(R.string.settings_export_dialog_title),
-            body = stringResource(R.string.settings_export_dialog_body),
+            title = stringResource(
+                if (encrypted) R.string.settings_export_dialog_title_encrypted else R.string.settings_export_dialog_title,
+            ),
+            body = stringResource(
+                if (encrypted) R.string.settings_export_dialog_body_encrypted else R.string.settings_export_dialog_body,
+            ),
             confirm = stringResource(R.string.settings_export_confirm),
             onConfirm = {
                 confirmExport = false
                 onExport()
             },
             onDismiss = { confirmExport = false },
+        )
+    }
+    if (confirmReadable) {
+        ThroneDialog(
+            title = stringResource(R.string.settings_export_dialog_title),
+            body = stringResource(R.string.settings_export_dialog_body),
+            confirm = stringResource(R.string.settings_export_confirm),
+            onConfirm = {
+                confirmReadable = false
+                onExportReadable()
+            },
+            onDismiss = { confirmReadable = false },
         )
     }
     if (showDisclaimer) {
@@ -247,6 +382,33 @@ private fun SettingsRow(
             trailing()
         }
     }
+}
+
+@Composable
+private fun AutoExportRow(enabled: Boolean, body: String, onChange: (Boolean) -> Unit) {
+    SettingsRow(
+        icon = R.drawable.ic_download,
+        title = stringResource(R.string.settings_auto_export),
+        body = body,
+        modifier = Modifier.toggleable(
+            value = enabled,
+            role = Role.Switch,
+            onValueChange = onChange,
+        ),
+        trailing = {
+            Switch(
+                checked = enabled,
+                onCheckedChange = null,
+                colors = SwitchDefaults.colors(
+                    checkedThumbColor = Throne.OnGold,
+                    checkedTrackColor = Throne.Gold,
+                    uncheckedThumbColor = Throne.TextMuted,
+                    uncheckedTrackColor = Throne.CardRaised,
+                    uncheckedBorderColor = Throne.Outline,
+                ),
+            )
+        },
+    )
 }
 
 @Composable

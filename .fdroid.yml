@@ -1,0 +1,34 @@
+Categories:
+  - Sports & Health
+License: GPL-3.0-only
+AuthorName: squishey123
+SourceCode: https://github.com/squishey123/Stool-Sentry
+IssueTracker: https://github.com/squishey123/Stool-Sentry/issues
+Changelog: https://github.com/squishey123/Stool-Sentry/releases
+
+AutoName: Stool Sentry
+RepoType: git
+Repo: https://github.com/squishey123/Stool-Sentry.git
+
+Builds:
+  - versionName: '1.0.1'
+    versionCode: 2
+    commit: v1.0.1
+    subdir: app
+    gradle:
+      - yes
+    output: build/outputs/apk/release/app-release-unsigned.apk
+
+AllowedAPKSigningKeys:
+  - 824dbabf1e00ba8d3686fb3c0f92e805e83d82e5a6d8cd8f0f730b7111250e43
+
+AutoUpdateMode: Version
+UpdateCheckMode: Tags v[0-9.]+
+UpdateCheckData: version.properties|VERSION_CODE=(\d+)|.|VERSION_NAME=(.*)
+CurrentVersion: '1.0.1'
+CurrentVersionCode: 2
+
+Binaries: https://github.com/squishey123/Stool-Sentry/releases/download/v%v/stool-sentry-%v.apk
+
+MaintainerNotes: |
+  v1.0.0 is not reproducible. That tag pins a Windows JDK path and has no fastlane metadata. Do not add a build for it. v1.0.1 is the first version to publish, and only after that GitHub Release asset exists. AllowedAPKSigningKeys is the certificate from stool-sentry-1.0.0.apk.

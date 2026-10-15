@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
+import android.net.Uri
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalResources
 import androidx.fragment.app.FragmentActivity
@@ -40,6 +41,10 @@ import androidx.navigation.navArgument
 import com.squishey.stoolsentry.AppContainer
 import com.squishey.stoolsentry.R
 import com.squishey.stoolsentry.domain.BowelLog
+import com.squishey.stoolsentry.domain.ExportCrypto
+import com.squishey.stoolsentry.ui.encrypt.BackupPassphraseDialog
+import com.squishey.stoolsentry.ui.encrypt.PassphraseForm
+import com.squishey.stoolsentry.ui.encrypt.PassphraseMode
 import com.squishey.stoolsentry.domain.WizardStep
 import com.squishey.stoolsentry.ui.calendar.CalendarScreen
 import com.squishey.stoolsentry.ui.calendar.CalendarViewModel
@@ -49,6 +54,7 @@ import com.squishey.stoolsentry.ui.lock.Biometrics
 import com.squishey.stoolsentry.ui.log.LogWizardScreen
 import com.squishey.stoolsentry.ui.log.LogWizardViewModel
 import com.squishey.stoolsentry.ui.log.WizardUiState
+import com.squishey.stoolsentry.ui.settings.LicenseScreen
 import com.squishey.stoolsentry.ui.settings.SettingsScreen
 import com.squishey.stoolsentry.ui.settings.SettingsViewModel
 import com.squishey.stoolsentry.ui.summary.SummaryScreen
@@ -246,7 +252,27 @@ fun AppNavHost(
                 vm = vm,
                 container = container,
                 onBack = dropUnlessResumed { nav.popBackStack() },
+                onLicense = dropUnlessResumed { nav.navigate(RoutePatterns.LICENSE) },
+                onNavigateEncrypt = dropUnlessResumedWith { mode: String ->
+                    nav.navigate(RoutePatterns.encrypt(mode))
+                },
                 showMessage = showMessage,
+            )
+        }
+
+        composable(RoutePatterns.LICENSE) {
+            LicenseScreen(onBack = dropUnlessResumed { nav.popBackStack() })
+        }
+
+        composable(
+            RoutePatterns.ENCRYPT,
+            arguments = listOf(navArgument(RoutePatterns.ARG_MODE) { type = NavType.StringType }),
+        ) { entry ->
+            val mode = entry.arguments?.getString(RoutePatterns.ARG_MODE)
+            EncryptionRoute(
+                mode = mode,
+                container = container,
+                onBack = dropUnlessResumed { nav.popBackStack() },
             )
         }
     }
@@ -298,12 +324,15 @@ private fun SettingsRoute(
     vm: SettingsViewModel,
     container: AppContainer,
     onBack: () -> Unit,
+    onLicense: () -> Unit,
+    onNavigateEncrypt: (String) -> Unit,
     showMessage: (String) -> Unit,
 ) {
     val context = LocalContext.current
     val resources = LocalResources.current
     val activity = LocalActivity.current as? FragmentActivity
     val settings by vm.settings.collectAsStateWithLifecycle()
+    val encrypted by vm.encrypted.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     var lockAvailable by remember { mutableStateOf(Biometrics.isAvailable(context)) }
     LifecycleResumeEffect(Unit) {
@@ -311,61 +340,95 @@ private fun SettingsRoute(
         onPauseOrDispose { }
     }
 
+    val folderLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocumentTree(),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch {
+            val ok = vm.useAutoExportFolder(uri)
+            showMessage(
+                resources.getString(
+                    if (ok) {
+                        R.string.snack_auto_export_on
+                    } else if (encrypted) {
+                        R.string.snack_auto_export_failed_encrypted
+                    } else {
+                        R.string.snack_auto_export_failed
+                    },
+                ),
+            )
+        }
+    }
+
     val exportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("text/csv"),
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
+        scope.launch { writeExport(context, uri, vm.exportCsv().toByteArray(Charsets.UTF_8), showMessage, resources) }
+    }
+
+    val encryptedExportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/octet-stream"),
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val ok = runCatching {
+            val bytes = runCatching {
                 val csv = vm.exportCsv()
-                withContext(Dispatchers.IO) {
-                    val stream = context.contentResolver.openOutputStream(uri, "wt")
-                        ?: error("No output stream")
-                    stream.use { it.write(csv.toByteArray(Charsets.UTF_8)) }
-                }
-            }.isSuccess
-            showMessage(resources.getString(if (ok) R.string.snack_export_done else R.string.snack_export_failed))
+                container.vault.seal(csv) ?: error("Encryption is off")
+            }.getOrNull()
+            if (bytes == null) {
+                showMessage(resources.getString(R.string.snack_export_failed))
+                return@launch
+            }
+            writeExport(context, uri, bytes, showMessage, resources)
         }
     }
+
+    var pendingImport by remember { mutableStateOf<ByteArray?>(null) }
+    var importPassphraseFailed by remember { mutableStateOf(false) }
 
     val importLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument(),
     ) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
         scope.launch {
-            val text = runCatching {
+            val bytes = runCatching {
                 withContext(Dispatchers.IO) {
-                    context.contentResolver.openInputStream(uri)?.use { readLimited(it) }
+                    context.contentResolver.openInputStream(uri)?.use { readLimitedBytes(it) }
                 }
             }.getOrNull()
+            if (bytes == null) {
+                showMessage(resources.getString(R.string.snack_import_failed))
+                return@launch
+            }
+            val text = container.vault.readBackup(bytes)
+            if (text == null && ExportCrypto.looksEncrypted(bytes)) {
+                importPassphraseFailed = false
+                pendingImport = bytes
+                return@launch
+            }
             if (text == null) {
                 showMessage(resources.getString(R.string.snack_import_failed))
                 return@launch
             }
-            val result = vm.importCsv(text)
-            val message = when {
-                result.imported == 0 -> resources.getString(R.string.snack_import_nothing)
-                result.skipped == 0 -> resources.getQuantityString(
-                    R.plurals.snack_imported,
-                    result.imported,
-                    result.imported,
-                )
-                else -> resources.getQuantityString(
-                    R.plurals.snack_imported_skipped,
-                    result.skipped,
-                    result.imported,
-                    result.skipped,
-                )
-            }
-            showMessage(message)
+            showImportResult(vm.importCsv(text), showMessage, resources)
         }
     }
 
     SettingsScreen(
         settings = settings,
         lockAvailable = lockAvailable,
+        encrypted = encrypted,
         onBack = onBack,
         onExport = {
+            container.appLock.allowExternalActivity()
+            val name = resources.getString(
+                if (encrypted) R.string.export_file_name_encrypted else R.string.export_file_name,
+                container.clock.today().toString(),
+            )
+            if (encrypted) encryptedExportLauncher.launch(name) else exportLauncher.launch(name)
+        },
+        onExportReadable = {
             container.appLock.allowExternalActivity()
             exportLauncher.launch(
                 resources.getString(R.string.export_file_name, container.clock.today().toString()),
@@ -377,6 +440,35 @@ private fun SettingsRoute(
                 arrayOf("text/*", "application/csv", "application/vnd.ms-excel", "application/octet-stream"),
             )
         },
+        onAutoExportEnabled = { enable ->
+            if (!enable) {
+                vm.setAutoExportEnabled(false)
+            } else {
+                scope.launch {
+                    val ok = vm.enableAutoExport()
+                    showMessage(
+                        resources.getString(
+                            if (ok) {
+                                R.string.snack_auto_export_on
+                            } else if (encrypted) {
+                                R.string.snack_auto_export_failed_encrypted
+                            } else {
+                                R.string.snack_auto_export_failed
+                            },
+                        ),
+                    )
+                }
+            }
+        },
+        onPickAutoExportFolder = {
+            container.appLock.allowExternalActivity()
+            val initial = settings.autoExportTreeUri?.let { runCatching { Uri.parse(it) }.getOrNull() }
+            folderLauncher.launch(initial)
+        },
+        onLicense = onLicense,
+        onEnableEncryption = { onNavigateEncrypt("create") },
+        onChangePassphrase = { onNavigateEncrypt("change") },
+        onDisableEncryption = { onNavigateEncrypt("disable") },
         onLockChange = { enable ->
             if (!enable) {
                 vm.setAppLockEnabled(false)
@@ -393,9 +485,92 @@ private fun SettingsRoute(
         },
         onWeekStart = vm::setWeekStart,
     )
+
+    val pending = pendingImport
+    if (pending != null) {
+        BackupPassphraseDialog(
+            failed = importPassphraseFailed,
+            onDismiss = { pendingImport = null },
+            onSubmit = { passphrase ->
+                scope.launch {
+                    val text = container.vault.readBackup(pending, passphrase)
+                    if (text == null) {
+                        importPassphraseFailed = true
+                    } else {
+                        pendingImport = null
+                        showImportResult(vm.importCsv(text), showMessage, resources)
+                    }
+                }
+            },
+        )
+    }
 }
 
-private fun readLimited(input: InputStream): String? {
+@Composable
+private fun EncryptionRoute(
+    mode: String?,
+    container: AppContainer,
+    onBack: () -> Unit,
+) {
+    val passphraseMode = when (mode) {
+        "change" -> PassphraseMode.Change
+        "disable" -> PassphraseMode.Disable
+        else -> PassphraseMode.Create
+    }
+    PassphraseForm(
+        mode = passphraseMode,
+        onBack = onBack,
+        matchesCurrent = container.vault::matches,
+        onSubmit = { passphrase ->
+            when (passphraseMode) {
+                PassphraseMode.Create -> container.vault.beginEnable(passphrase)
+                PassphraseMode.Change -> container.vault.beginChange(passphrase)
+                PassphraseMode.Disable -> container.vault.beginDisable(passphrase)
+                PassphraseMode.Unlock -> Unit
+            }
+        },
+    )
+}
+
+private suspend fun writeExport(
+    context: android.content.Context,
+    uri: Uri,
+    bytes: ByteArray,
+    showMessage: (String) -> Unit,
+    resources: android.content.res.Resources,
+) {
+    val ok = runCatching {
+        withContext(Dispatchers.IO) {
+            val stream = context.contentResolver.openOutputStream(uri, "wt") ?: error("No output stream")
+            stream.use { it.write(bytes) }
+        }
+    }.isSuccess
+    showMessage(resources.getString(if (ok) R.string.snack_export_done else R.string.snack_export_failed))
+}
+
+private suspend fun showImportResult(
+    result: com.squishey.stoolsentry.domain.ImportResult,
+    showMessage: (String) -> Unit,
+    resources: android.content.res.Resources,
+) {
+    val message = when {
+        result.imported == 0 -> resources.getString(R.string.snack_import_nothing)
+        result.skipped == 0 -> resources.getQuantityString(
+            R.plurals.snack_imported,
+            result.imported,
+            result.imported,
+        )
+        else -> resources.getQuantityString(
+            R.plurals.snack_imported_skipped,
+            result.skipped,
+            result.imported,
+            result.skipped,
+        )
+    }
+    showMessage(message)
+}
+
+private fun readLimitedBytes(input: InputStream): ByteArray? {
     val buffer = ByteArray(8 * 1024)
     val output = ByteArrayOutputStream()
     while (true) {
@@ -404,5 +579,5 @@ private fun readLimited(input: InputStream): String? {
         output.write(buffer, 0, read)
         if (output.size() > MAX_IMPORT_BYTES) return null
     }
-    return output.toString(Charsets.UTF_8.name())
+    return output.toByteArray()
 }

@@ -1,0 +1,1 @@
+You can encrypt the logs on this phone and the backup file with a passphrase you choose. Auto-export can save a copy in a folder you pick after each change. A readable CSV is still available. Logs stay on this phone, with no account, ads, or internet access.

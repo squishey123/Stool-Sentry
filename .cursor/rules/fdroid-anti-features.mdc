@@ -1,0 +1,72 @@
+---
+description: Refuse every F-Droid Anti-Feature so Stool Sentry can ship with none
+alwaysApply: true
+---
+
+# F-Droid Anti-Features
+
+Stool Sentry is meant to be listed on F-Droid with no Anti-Feature flags, so it can auto-update from F-Droid. The flags are defined at https://f-droid.org/en/docs/Anti-Features/. They warn users about behavior that serves the developer or a third party.
+
+Treat every flag below as forbidden. If a request would add one, stop before writing it, name the flag, and explain the conflict. Do not implement a partial version, an off-by-default version, or a "we can remove it later" version. Opt-in does not make a flag acceptable in this project.
+
+The app already strips `android.permission.INTERNET` with `tools:node="remove"` in `AndroidManifest.xml`. Leave that removal in place. Libraries must not merge the permission back in.
+
+## Ads
+
+F-Droid applies Ads when the app contains advertising. Proprietary ad SDKs such as AdMob are rejected outright and never reach the store.
+
+Do not add advertisements, house ads, sponsored rows, interstitials, or ad SDKs. A medical disclaimer, the GPL license screen, and a statement that the app is free are not ads.
+
+## Disabled Algorithm
+
+F-Droid applies Disabled Algorithm when a release is signed with an outdated or unsafe signature algorithm, including SHA-1 or MD5 and JAR signing (APK Signature Scheme v1) alone.
+
+Sign release builds with APK Signature Scheme v2 and v3 using SHA-256. Keep v1 signing off. `minSdk` is 26, so v1 is unnecessary. Do not set `v1SigningEnabled = true`, do not sign with `jarsigner`, and do not switch the release key to SHA-1 or MD5. F-Droid rebuilds and re-signs from source; still keep upstream signatures modern so reproducible checks stay clean.
+
+## Known Vulnerability
+
+F-Droid applies Known Vulnerability when a scanner in fdroidserver finds a known security vulnerability in the built app.
+
+Keep dependencies on current, maintained releases. Do not vendor old jars, native libraries, or pinned vulnerable versions to make a build pass. When a scanner, advisory, or F-Droid build reports a vulnerability, fix that dependency or code path before tagging a release. Do not ship a release that fdroidserver would flag.
+
+## Non-Free Addons
+
+F-Droid applies Non-Free Addons when a free app promotes non-free applications or plugins.
+
+Do not link to the Play Store, recommend a proprietary app, or ship a plugin system aimed at proprietary add-ons. The auto-export note may say that a cloud storage app the user already has can sync the folder they chose. It must not name, link, or prefer a specific proprietary app. Linking to this project's own source, license, or F-Droid page is fine.
+
+## Non-Free Assets
+
+F-Droid applies Non-Free Assets when the app contains non-code media under a license that restricts commercial use or derivative works. Creative Commons NC and ND licenses are the usual cause. Code under a non-free license is an inclusion rejection, not this flag.
+
+Artwork, icons, fonts, sounds, and other media must be original to this project or under a free license: GPL, Apache-2.0, MIT, CC0, CC-BY, or SIL Open Font License. Playfair Display and Manrope stay under the OFL, with the license texts in `third_party/fonts/`. Keep those texts when the fonts ship. Do not add icon packs, stock art, music, or photos whose license forbids commercial use or derivatives. Launcher art and vector icons in this repo are part of the GPL work.
+
+## Non-Free Dependencies
+
+F-Droid applies Non-Free Dependencies when the app needs something that is not free software in order to run, even if that software is not inside the APK. The usual case is an app that is useless unless Google Maps or another proprietary app is installed.
+
+Runtime dependencies must be free software. Allowed: AndroidX, Kotlin, Room, DataStore, Compose, and other free libraries resolved from Google's Maven or Maven Central. Forbidden: Google Play services, Firebase, Google Maps SDK, Play Billing, AdMob, Crashlytics, Facebook or other analytics SDKs, Huawei Mobile Services, and any proprietary AAR or Maven repository. `BiometricPrompt` and the device screen lock are part of Android, and app lock must keep working without Play services. The app must remain fully useful with none of those proprietary packages installed.
+
+## Non-Free Network Services
+
+F-Droid applies Non-Free Network Services when the app promotes or depends entirely on a proprietary network service.
+
+Do not add a backend, account, login, or sync path that requires Google, Firebase, a vendor cloud, or any other proprietary service. Do not promote one. Logs stay on the phone. Export and import stay local files the user chooses. A future sync feature is allowed only as an optional extra that speaks a protocol the user can self-host, with the app still complete when that extra is unused.
+
+## No Source Since
+
+F-Droid applies No Source Since when upstream source disappears: the app goes proprietary, the repository is removed, or the source moves somewhere F-Droid cannot find. F-Droid then cannot publish updates. A private repository also fails F-Droid's inclusion policy, so the app cannot be added until the source is public.
+
+Keep the complete corresponding source public for every release: app code, fonts, license, Gradle build, and the tag F-Droid builds. `LICENSE` is GPL-3.0 and the in-app license screen shows it. Do not relicensed to a proprietary license, do not ship a binary whose source is missing from the tag, and do not move the canonical source to a private repo. The README currently says this repository is private; it has to be public before an F-Droid submission and it has to stay public after that.
+
+## Tethered Network Services
+
+F-Droid applies Tethered Network Services when the app depends entirely on one service that the user cannot practically replace. A simple setting that points at any public, self-hostable instance avoids the flag.
+
+The app must work with no server and no account. Do not hardcode a host, API, or account system as the only way to use the app. CSV export to a folder the user picks is local storage, not a tethered service. If a network feature is ever added, the user must be able to select the instance, the software behind that instance must be free and self-hostable, and every current feature must still work with the network feature turned off.
+
+## Tracking
+
+F-Droid applies Tracking when the app tracks or reports activity somewhere without permission, or by default so the user must hunt for the off switch. F-Droid's own examples are crash reports and update checks that run unless the user opts in. Proprietary analytics libraries are rejected from the repo entirely. F-Droid allows some reporting when it is off by default, asked first, and covered by a privacy policy. This project does not use that allowance.
+
+Do not add analytics, crash reporting, telemetry, advertising IDs, install referrers, update checks, or phone-home of any kind, including opt-in. Do not add Sentry, Firebase Analytics, Google Analytics, Flurry, or a custom endpoint that receives usage. The app does not request internet access. Keep it that way.

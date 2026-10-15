@@ -23,6 +23,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -32,6 +33,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -42,7 +44,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.squishey.stoolsentry.AppContainer
 import com.squishey.stoolsentry.R
 import com.squishey.stoolsentry.domain.UserSettings
+import com.squishey.stoolsentry.data.VaultPhase
 import com.squishey.stoolsentry.ui.components.throneBackground
+import com.squishey.stoolsentry.ui.encrypt.EncryptionOfferScreen
+import com.squishey.stoolsentry.ui.encrypt.UnlockScreen
+import com.squishey.stoolsentry.ui.encrypt.WorkingScreen
 import com.squishey.stoolsentry.ui.lock.Biometrics
 import com.squishey.stoolsentry.ui.lock.LockScreen
 import com.squishey.stoolsentry.ui.nav.AppNavHost
@@ -51,6 +57,8 @@ import com.squishey.stoolsentry.ui.theme.Throne
 import com.squishey.stoolsentry.ui.welcome.WelcomeScreen
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.NonCancellable
 
 @Composable
 fun StoolSentryRoot(container: AppContainer) {
@@ -69,6 +77,35 @@ fun StoolSentryRoot(container: AppContainer) {
             }
         }
     }
+    val phase by container.vault.phase.collectAsStateWithLifecycle()
+    val unlockFailed by container.vault.unlockFailed.collectAsStateWithLifecycle()
+    val unlockBusy by container.vault.busy.collectAsStateWithLifecycle()
+    val resources = LocalResources.current
+
+    LaunchedEffect(settings?.disclaimerAccepted) {
+        if (settings?.disclaimerAccepted == true) container.vault.start()
+    }
+    LaunchedEffect(phase) {
+        val working = phase as? VaultPhase.Working ?: return@LaunchedEffect
+        withContext(NonCancellable) {
+            container.vault.perform(working.request)
+        }
+    }
+    LaunchedEffect(container) {
+        container.autoExporter.failures.collect {
+            val encrypted = container.vault.encrypted.value
+            showMessage(
+                resources.getString(
+                    if (encrypted) R.string.snack_auto_export_failed_encrypted else R.string.snack_auto_export_failed,
+                ),
+            )
+        }
+    }
+    LaunchedEffect(container) {
+        container.vault.errors.collect {
+            showMessage(resources.getString(R.string.encrypt_failed))
+        }
+    }
 
     StoolSentryTheme {
         Box(
@@ -82,6 +119,17 @@ fun StoolSentryRoot(container: AppContainer) {
                 !current.disclaimerAccepted -> WelcomeScreen(
                     onAccept = { scope.launch { container.settings.setDisclaimerAccepted(true) } },
                 )
+                phase is VaultPhase.Loading -> Unit
+                phase is VaultPhase.Offer -> EncryptionOfferScreen(
+                    onSkip = container.vault::skipOffer,
+                    onEnable = container.vault::beginEnable,
+                )
+                phase is VaultPhase.Locked -> UnlockScreen(
+                    failed = unlockFailed,
+                    busy = unlockBusy,
+                    onSubmit = container.vault::submitUnlock,
+                )
+                phase is VaultPhase.Working -> WorkingScreen((phase as VaultPhase.Working).kind)
                 else -> {
                     val showLock = current.appLockEnabled && locked
                     Box(if (showLock) Modifier.clearAndSetSemantics { } else Modifier) {

@@ -3,6 +3,7 @@ package com.squishey.stoolsentry.ui.day
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squishey.stoolsentry.data.AutoExporter
 import com.squishey.stoolsentry.data.LogRepository
 import com.squishey.stoolsentry.domain.AppClock
 import com.squishey.stoolsentry.domain.BowelLog
@@ -17,6 +18,7 @@ import kotlinx.coroutines.launch
 class DayViewModel(
     private val repository: LogRepository,
     private val clock: AppClock,
+    private val autoExporter: AutoExporter,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     val date: LocalDate = savedStateHandle.get<String>(RoutePatterns.ARG_DATE)
@@ -36,6 +38,7 @@ class DayViewModel(
     fun delete(id: Long) {
         viewModelScope.launch {
             repository.delete(id)
+            autoExporter.enqueue()
         }
     }
 }

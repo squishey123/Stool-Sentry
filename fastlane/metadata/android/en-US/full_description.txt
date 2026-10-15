@@ -1,0 +1,7 @@
+Stool Sentry is a private bowel movement tracker. It keeps a calendar of your logs, records each one on the Bristol scale, and shows trends over time.
+
+Logging takes four steps: Bristol type, size, color, then date, time, symptoms, and an optional note. Tap a day to review, edit, or delete that day's logs. The summary covers 7 days, 30 days, 90 days, and all time.
+
+Logs stay on this phone. There is no account, no ads, and no internet access. Export a backup from Settings if you want a copy. Encryption is optional. When it is on, the database and the backup file use a passphrase you choose. A readable CSV is still available as a separate export.
+
+Stool Sentry is a personal log, not a medical device. It does not diagnose, treat, or prevent any condition.

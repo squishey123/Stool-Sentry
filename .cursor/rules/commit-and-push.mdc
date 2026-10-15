@@ -8,8 +8,10 @@ alwaysApply: true
 When the user says "Commit & Push", run the publish flow. Do not run it for any other commit. The Phase 1 handoff commit is an ordinary commit and must not follow this flow.
 
 1. Do not change git config. If this machine has no commit identity, stop and ask.
-2. Read version.properties. If origin already has the tag v{VERSION_NAME}, add 1 to the patch number and add 1 to VERSION_CODE. If that tag does not exist, publish the current version as-is. A hand-edited version such as 1.1.0 is kept when its tag is new. The first publish stays 1.0.0.
-3. Commit the project. Do not commit Mailbox/, the keystore, keystore.properties, local.properties, or signing secrets.
-4. Tag v{VERSION_NAME} and push the branch and the tag.
-5. Wait until the Release GitHub Actions workflow for that tag succeeds. If it fails, do not bump again. Fix the build and re-run that same tag.
-6. Write user-facing release notes with `gh release edit`. For v1.0.0, describe the first release. After that, describe the changes since the previous tag. Do not make another commit for the notes.
+2. Read version.properties. If origin already has the tag v{VERSION_NAME}, add 1 to the patch number and add 1 to VERSION_CODE. If that tag does not exist, publish the current version as-is. A hand-edited version such as 1.1.0 is kept when its tag is new. The first publish stays 1.0.0. Keep the two lines `VERSION_NAME=` and `VERSION_CODE=` and keep the file LF-only.
+3. Write `fastlane/metadata/android/en-US/changelogs/{VERSION_CODE}.txt` for the version being published. It describes the user-facing changes since the previous tag, in 500 characters or fewer. Include that file in the release commit. v1.0.0 is already tagged, so the next release is 1.0.1 and the changelog file is `changelogs/2.txt`.
+4. Commit the project. Do not commit Mailbox/, the keystore, keystore.properties, local.properties, or signing secrets. Do not change `applicationId` (`com.squishey.stoolsentry`) or the release signing key. The GitHub APK and every F-Droid build must verify as certificate SHA-256 `824dbabf1e00ba8d3686fb3c0f92e805e83d82e5a6d8cd8f0f730b7111250e43`.
+5. Tag only `v{VERSION_NAME}` and push the branch and the tag. Do not add other tags. Do not move or rebuild `v1.0.0`.
+6. Wait until the Release GitHub Actions workflow for that tag succeeds. If it fails, do not bump again. Fix the build and re-run that same tag. The uploaded file must stay `stool-sentry-{version}.apk`.
+7. Write user-facing release notes with `gh release edit`, using the changelog file from step 3 as the notes. Do not make another commit for the notes.
+8. Do not open the F-Droid metadata merge request in this flow. That request waits until this tag's GitHub Release asset exists and the user asks to submit it. `.fdroid.yml` must list this tag and must not list `v1.0.0`.

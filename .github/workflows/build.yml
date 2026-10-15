@@ -23,8 +23,5 @@ jobs:
         with:
           packages: platforms;android-37.2 build-tools;36.0.0 platform-tools
 
-      - name: Use the runner JDK
-        run: sed -i '/^org.gradle.java.home=/d' gradle.properties
-
       - name: Test and assemble debug
         run: chmod +x gradlew && ./gradlew test assembleDebug --stacktrace

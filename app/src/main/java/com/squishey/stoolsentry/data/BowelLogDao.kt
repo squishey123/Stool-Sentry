@@ -17,6 +17,9 @@ interface BowelLogDao {
     @Query("SELECT * FROM bowel_logs ORDER BY occurredAtMillis ASC")
     suspend fun getAll(): List<BowelLogEntity>
 
+    @Query("SELECT COUNT(*) FROM bowel_logs")
+    suspend fun count(): Int
+
     @Query("SELECT * FROM bowel_logs WHERE id = :id")
     suspend fun get(id: Long): BowelLogEntity?
 

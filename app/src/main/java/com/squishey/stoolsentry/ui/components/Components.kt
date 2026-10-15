@@ -352,12 +352,15 @@ fun BrandMark(
     } else {
         Modifier
     }
+    val painter = painterResource(R.drawable.ic_brand_logs)
+    val intrinsic = painter.intrinsicSize
+    val aspect = if (intrinsic.width > 0f && intrinsic.height > 0f) intrinsic.height / intrinsic.width else 1f
     Image(
-        painter = painterResource(R.drawable.ic_brand_logs),
+        painter = painter,
         contentDescription = null,
         modifier = modifier
             .then(glowModifier)
-            .size(width = width, height = width * (42f / 48f)),
+            .size(width = width, height = width * aspect),
     )
 }
 

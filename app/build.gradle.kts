@@ -19,6 +19,8 @@ if (hasReleaseKeystore) {
 
 android {
     namespace = "com.squishey.stoolsentry"
+    // Pinned so GitHub Actions and the F-Droid buildserver package resources the same way.
+    buildToolsVersion = "36.0.0"
     compileSdk {
         version = release(37) {
             minorApiLevel = 2
@@ -41,6 +43,9 @@ android {
                 storePassword = keystoreProperties.getProperty("storePassword")
                 keyAlias = keystoreProperties.getProperty("keyAlias")
                 keyPassword = keystoreProperties.getProperty("keyPassword")
+                enableV1Signing = false
+                enableV2Signing = true
+                enableV3Signing = true
             }
         }
     }
@@ -48,6 +53,9 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
+            // Release builds include VCS metadata unless this is set. The checkout URL
+            // differs between GitHub Actions and the F-Droid buildserver.
+            vcsInfo.include = false
             if (hasReleaseKeystore) {
                 signingConfig = signingConfigs.getByName("release")
             }
@@ -64,10 +72,27 @@ android {
         buildConfig = true
     }
 
+    // The dependency list embedded in the APK records the machine that built it.
+    // Native libraries come from Maven (AndroidX, SQLCipher). Stripping them
+    // depends on whether an NDK is installed, so both builders must leave them intact.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
+    packaging {
+        jniLibs {
+            keepDebugSymbols.add("**/*.so")
+        }
+    }
+
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
         }
+    }
+
+    sourceSets.named("main") {
+        assets.directories.add(rootProject.file("third_party/sqlcipher").absolutePath)
     }
 }
 
@@ -106,6 +131,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.2.1")
     implementation("androidx.room:room-runtime:2.8.5")
     implementation("androidx.room:room-ktx:2.8.5")
+    implementation("net.zetetic:sqlcipher-android:4.19.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.10.2")
     ksp("androidx.room:room-compiler:2.8.5")
 

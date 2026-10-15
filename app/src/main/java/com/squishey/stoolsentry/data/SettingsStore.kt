@@ -24,6 +24,10 @@ class SettingsStore(context: Context) {
             weekStart = storedWeekStart ?: WeekFields.of(Locale.getDefault()).firstDayOfWeek,
             disclaimerAccepted = preferences[Keys.DISCLAIMER_ACCEPTED] ?: false,
             appLockEnabled = preferences[Keys.APP_LOCK_ENABLED] ?: false,
+            autoExportEnabled = preferences[Keys.AUTO_EXPORT_ENABLED] ?: false,
+            autoExportTreeUri = preferences[Keys.AUTO_EXPORT_TREE_URI]?.takeIf { it.isNotBlank() },
+            autoExportFolderName = preferences[Keys.AUTO_EXPORT_FOLDER_NAME]?.takeIf { it.isNotBlank() },
+            encryptionOfferSeen = preferences[Keys.ENCRYPTION_OFFER_SEEN] ?: false,
         )
     }
 
@@ -45,9 +49,33 @@ class SettingsStore(context: Context) {
         }
     }
 
+    suspend fun setAutoExportEnabled(enabled: Boolean) {
+        appContext.settingsDataStore.edit { preferences ->
+            preferences[Keys.AUTO_EXPORT_ENABLED] = enabled
+        }
+    }
+
+    suspend fun setEncryptionOfferSeen(seen: Boolean) {
+        appContext.settingsDataStore.edit { preferences ->
+            preferences[Keys.ENCRYPTION_OFFER_SEEN] = seen
+        }
+    }
+
+    suspend fun setAutoExportDestination(uri: String, folderName: String) {
+        appContext.settingsDataStore.edit { preferences ->
+            preferences[Keys.AUTO_EXPORT_ENABLED] = true
+            preferences[Keys.AUTO_EXPORT_TREE_URI] = uri
+            preferences[Keys.AUTO_EXPORT_FOLDER_NAME] = folderName
+        }
+    }
+
     private object Keys {
         val WEEK_START = stringPreferencesKey("week_start")
         val DISCLAIMER_ACCEPTED = booleanPreferencesKey("disclaimer_accepted")
         val APP_LOCK_ENABLED = booleanPreferencesKey("app_lock_enabled")
+        val AUTO_EXPORT_ENABLED = booleanPreferencesKey("auto_export_enabled")
+        val AUTO_EXPORT_TREE_URI = stringPreferencesKey("auto_export_tree_uri")
+        val AUTO_EXPORT_FOLDER_NAME = stringPreferencesKey("auto_export_folder_name")
+        val ENCRYPTION_OFFER_SEEN = booleanPreferencesKey("encryption_offer_seen")
     }
 }

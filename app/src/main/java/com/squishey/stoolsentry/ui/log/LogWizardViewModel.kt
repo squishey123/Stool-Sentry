@@ -3,6 +3,7 @@ package com.squishey.stoolsentry.ui.log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.squishey.stoolsentry.data.AutoExporter
 import com.squishey.stoolsentry.data.LogRepository
 import com.squishey.stoolsentry.domain.AppClock
 import com.squishey.stoolsentry.domain.BowelLog
@@ -34,6 +35,7 @@ sealed interface WizardUiState {
 class LogWizardViewModel(
     private val repository: LogRepository,
     private val clock: AppClock,
+    private val autoExporter: AutoExporter,
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     private val state = MutableStateFlow<WizardUiState>(WizardUiState.Loading)
@@ -109,6 +111,7 @@ class LogWizardViewModel(
                 val id = repository.save(log)
                 val stored = log.copy(id = id)
                 publish(ready.draft.copy(existingId = id), saving = false)
+                autoExporter.enqueue()
                 savedEvents.emit(stored)
             } finally {
                 val current = state.value

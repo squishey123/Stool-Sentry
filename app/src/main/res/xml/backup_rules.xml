@@ -4,4 +4,9 @@
     <exclude domain="database" path="stool_sentry.db-wal" />
     <exclude domain="database" path="stool_sentry.db-shm" />
     <exclude domain="database" path="stool_sentry.db-journal" />
+    <exclude domain="database" path="stool_sentry_migrating.db" />
+    <exclude domain="database" path="stool_sentry_migrating.db-wal" />
+    <exclude domain="database" path="stool_sentry_migrating.db-shm" />
+    <exclude domain="database" path="stool_sentry_migrating.db-journal" />
+    <exclude domain="file" path="stool_sentry.wrap" />
 </full-backup-content>
