@@ -1,0 +1,1 @@
+The install is smaller. Release builds are now shrunk, so the app takes less space on the phone.
