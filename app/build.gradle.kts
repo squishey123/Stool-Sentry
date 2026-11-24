@@ -52,7 +52,12 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(
+                getDefaultProguardFile("proguard-android-optimize.txt"),
+                "proguard-rules.pro",
+            )
             // Release builds include VCS metadata unless this is set. The checkout URL
             // differs between GitHub Actions and the F-Droid buildserver.
             vcsInfo.include = false
